@@ -31,15 +31,36 @@ async function run() {
         console.log('mongo Connected Successfully')
         const classesCollection = client.db('fighting-spirit').collection('classes');
         const instructorsCollection = client.db('fighting-spirit').collection('instructors');
+        const usersCollection = client.db('fighting-spirit').collection('users');
+        // classes
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result)
         })
+        // instructors
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
             res.send(result)
         })
-      
+        // users
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
+            const currentUser = await usersCollection.findOne(query).toArray();
+            if (currentUser) {
+                res.send({})
+            } else {
+                const result = await usersCollection.insertOne()
+                res.send(result)
+            }
+        })
+
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result)
+        })
+
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
