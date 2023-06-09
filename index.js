@@ -62,6 +62,18 @@ async function run() {
             res.send(result)
         })
 
+        // admin roles
+        app.patch('/adminRole/:id', async (req, res) => {
+            const id = req.params.id;
+            const role=req.body.role;
+            console.log(role)
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = { $set: { role: role } };
+            const options = { upsert: true };
+            const result = await userCollection.updateOne(filter, updateDoc,options);
+            res.send(result)
+    
+        })
 
     } finally {
         // Ensures that the client will close when you finish/error
