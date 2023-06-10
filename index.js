@@ -30,6 +30,7 @@ async function run() {
         client.connect();
         console.log('mongo Connected Successfully')
         const classesCollection = client.db('fighting-spirit').collection('classes');
+        const selectedClassesCollection = client.db('fighting-spirit').collection('selected-classes');
         const instructorsCollection = client.db('fighting-spirit').collection('instructors');
         const usersCollection = client.db('fighting-spirit').collection('users');
 
@@ -71,12 +72,25 @@ async function run() {
         app.get('/userRole', async (req, res) => {
             const email = req.query.email;
             const query = { email: email }
-            const result = await usersCollection.findOne(query)||{}
+            const result = await usersCollection.findOne(query) || {}
             res.send(result)
         })
 
         app.get('/users', async (req, res) => {
             const result = await usersCollection.find().toArray();
+            res.send(result)
+        })
+        // get selected Classes
+        app.get('/selectedClass/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await selectedClassesCollection.find(query).toArray();
+            res.send(result)
+        })
+        app.delete('/selectedClass/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await selectedClassesCollection.deleteOne(query);
             res.send(result)
         })
 
