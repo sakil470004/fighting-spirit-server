@@ -32,9 +32,19 @@ async function run() {
         const classesCollection = client.db('fighting-spirit').collection('classes');
         const instructorsCollection = client.db('fighting-spirit').collection('instructors');
         const usersCollection = client.db('fighting-spirit').collection('users');
+
+
         // classes
         app.get('/classes', async (req, res) => {
-            const result = await classesCollection.find().toArray();
+            const { email, status } = req.query;
+            let query = {}
+            if (email) {
+                query = { instructorEmail: email }
+            }
+            if (status) {
+                query = { status: status }
+            }
+            const result = await classesCollection.find(query).toArray();
             res.send(result)
         })
         // instructors
@@ -48,7 +58,7 @@ async function run() {
             // console.log(user)
             const query = { email: user.email }
             const currentUser = await usersCollection.findOne(query);
-        //    console.log(currentUser)
+            //    console.log(currentUser)
             if (currentUser) {
                 res.send({})
             } else {
@@ -56,24 +66,65 @@ async function run() {
                 res.send(result)
             }
         })
+        // user //role
+        // get single user
+        app.get('/userRole', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await usersCollection.findOne(query)||{}
+            res.send(result)
+        })
 
         app.get('/users', async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result)
         })
 
-        // admin roles
+        // admin roles work
         app.patch('/adminRole/:id', async (req, res) => {
             const id = req.params.id;
-            const role=req.body.role;
-            console.log(role)
+            const role = req.body.role;
             const filter = { _id: new ObjectId(id) };
             const updateDoc = { $set: { role: role } };
             const options = { upsert: true };
-            const result = await userCollection.updateOne(filter, updateDoc,options);
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result)
-    
+
         })
+        app.patch('/courseStatus/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = { $set: { status: status } };
+            const options = { upsert: true };
+            const result = await classesCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+
+        })
+        // instructor role
+        app.post('/addCourse', async (req, res) => {
+            const courses = req.body;
+            const result = await classesCollection.insertOne(courses)
+            res.send(result)
+        })
+        app.post('/updateCourse/:id', async (req, res) => {
+            const data = req.body
+            const id = req.params.id;
+            const { _id, ...rest } = data
+            const filter = { _id: new ObjectId(id) };
+            // console.log(id, filter, data)
+            const updateDoc = { $set: rest };
+            const result = await classesCollection.updateOne(filter, updateDoc);
+            res.send(result)
+
+        })
+        app.delete('/deleteCourse/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await classesCollection.deleteOne(query)
+            res.send(result)
+        })
+
 
     } finally {
         // Ensures that the client will close when you finish/error
