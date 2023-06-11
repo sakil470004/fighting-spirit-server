@@ -47,6 +47,7 @@ async function run() {
         client.connect();
         console.log('mongo Connected Successfully')
         const classesCollection = client.db('fighting-spirit').collection('classes');
+        const enrolledCollection = client.db('fighting-spirit').collection('enroll');
         const selectedClassesCollection = client.db('fighting-spirit').collection('selected-classes');
         const instructorsCollection = client.db('fighting-spirit').collection('instructors');
         const usersCollection = client.db('fighting-spirit').collection('users');
@@ -185,15 +186,15 @@ async function run() {
             const { price } = req.body;
             const amount = parseInt(price * 100);
             const paymentIntent = await stripe.paymentIntents.create({
-              amount: amount,
-              currency: 'usd',
-              payment_method_types: ['card']
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
             });
-      
+
             res.send({
-              clientSecret: paymentIntent.client_secret
+                clientSecret: paymentIntent.client_secret
             })
-          })
+        })
 
 
         // payment related api
@@ -206,10 +207,13 @@ async function run() {
             res.send({ insertResult, deleteResult });
         })
         // get Payment History 
-        app.get('/paymentHistory/:email',async (req,res)=>{
-            const email=req.params.email;
-            const query={email:email};
-            const result=await paymentCollection.find(query).sort({ fieldToSort: -1 }).toArray();
+        app.get('/paymentHistory/:email', async (req, res) => {
+            const email = req.params.email;
+            let query={};
+            if (email) {
+                query = { email: email };
+            }
+            const result = await paymentCollection.find(query).sort({ fieldToSort: -1 }).toArray();
             res.send(result)
         })
     } finally {
