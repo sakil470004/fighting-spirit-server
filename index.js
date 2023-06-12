@@ -53,8 +53,14 @@ async function run() {
         const usersCollection = client.db('fighting-spirit').collection('users');
         const paymentCollection = client.db('fighting-spirit').collection('payment');
 
-       
+        // for jwt make token
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
 
+            res.send({ token })
+        })
+        
         // classes
         app.get('/classes', async (req, res) => {
             const { email, status } = req.query;
