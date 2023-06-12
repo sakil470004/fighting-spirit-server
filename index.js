@@ -60,7 +60,7 @@ async function run() {
 
             res.send({ token })
         })
-        
+
         // classes
         app.get('/classes', async (req, res) => {
             const { email, status } = req.query;
